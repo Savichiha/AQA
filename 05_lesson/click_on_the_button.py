@@ -16,3 +16,5 @@ print("Количество кнопок 'Delete':", len(delete_buttons))
 
 driver.quit()
 
+
+
