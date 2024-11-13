@@ -7,11 +7,15 @@ driver = webdriver.Chrome()
 
 try:
     driver.get("https://bonigarcia.dev/selenium-webdriver-java/loading-images.html")
-    images = WebDriverWait(driver, 10).until(
-        EC.visibility_of_all_elements_located((By.CSS_SELECTOR, "img.img-fluid"))
+
+    WebDriverWait(driver, 30).until(
+        EC.text_to_be_present_in_element((By.ID, "text"), "Done!")
     )
-    third_image_src = images[2].get_attribute("src")
+
+    third_image = driver.find_elements(By.CSS_SELECTOR, "img.img-fluid")[2]
+    third_image_src = third_image.get_attribute("src")
     print("URL третьего изображения:", third_image_src)
 
 finally:
     driver.quit()
+

@@ -6,15 +6,12 @@ from selenium.webdriver.support import expected_conditions as EC
 driver = webdriver.Chrome()
 
 try:
-    driver.get("http://uitestingplayground.com/ajax")
-    blue_button = driver.find_element(By.CSS_SELECTOR, ".btn-primary")
-    blue_button.click()
-
-    green_message = WebDriverWait(driver, 10).until(
-        EC.visibility_of_element_located((By.CSS_SELECTOR, "#content > p"))
+    driver.get("https://bonigarcia.dev/selenium-webdriver-java/loading-images.html")
+    images = WebDriverWait(driver, 30).until(
+        EC.visibility_of_all_elements_located((By.CSS_SELECTOR, "img.img-fluid"))
     )
-
-    print(green_message.text)
+    third_image_src = images[2].get_attribute("src")
+    print("URL третьего изображения:", third_image_src)
 
 finally:
     driver.quit()
