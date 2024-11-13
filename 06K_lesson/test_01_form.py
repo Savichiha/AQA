@@ -15,29 +15,28 @@ def driver():
 def test_form_submission(driver):
     driver.get("https://bonigarcia.dev/selenium-webdriver-java/data-types.html")
 
-    driver.find_element(By.ID, "first-name").send_keys("Иван")
-    driver.find_element(By.ID, "last-name").send_keys("Петров")
-    driver.find_element(By.ID, "address").send_keys("Ленина, 55-3")
-    driver.find_element(By.ID, "email").send_keys("test@skypro.com")
-    driver.find_element(By.ID, "phone").send_keys("+7985899998787")
-    driver.find_element(By.ID, "city").send_keys("Москва")
-    driver.find_element(By.ID, "country").send_keys("Россия")
-    driver.find_element(By.ID, "job-position").send_keys("QA")
-    driver.find_element(By.ID, "company").send_keys("SkyPro")
+    driver.find_element(By.NAME, "first-name").send_keys("Иван")
+    driver.find_element(By.NAME, "last-name").send_keys("Петров")
+    driver.find_element(By.NAME, "address").send_keys("Ленина, 55-3")
+    driver.find_element(By.NAME, "e-mail").send_keys("test@skypro.com")
+    driver.find_element(By.NAME, "phone").send_keys("+7985899998787")
+    driver.find_element(By.NAME, "city").send_keys("Москва")
+    driver.find_element(By.NAME, "country").send_keys("Россия")
+    driver.find_element(By.NAME, "job-position").send_keys("QA")
+    driver.find_element(By.NAME, "company").send_keys("SkyPro")
 
-    driver.find_element(By.ID, "submit").click()
+    driver.find_element(By.TAG_NAME, "button").click()
 
     WebDriverWait(driver, 10).until(
-        EC.presence_of_element_located((By.CSS_SELECTOR, "#zip[style*='border-color: red']"))
+        EC.presence_of_element_located((By.ID, "zip-code"))
     )
 
-    zip_field = driver.find_element(By.ID, "zip")
-    assert "border-color: red" in zip_field.get_attribute("style")
+    zip_field_color = driver.find_element(By.CSS_SELECTOR, "#zip-code").value_of_css_property("background-color")
+    assert zip_field_color == "rgba(248, 215, 218, 1)", "Поле Zip code не подсвечено красным"
 
-    fields_to_check = [
-        "first-name", "last-name", "address", "email", "phone", "city", "country", "job-position", "company"
+    other_fields = [
+        "first-name", "last-name", "address", "e-mail", "phone", "city", "country", "job-position", "company"
     ]
-    for field_id in fields_to_check:
-        field = driver.find_element(By.ID, field_id)
-        assert "border-color: green" in field.get_attribute("style"), f"Поле {field_id} не подсвечено зелёным"
-
+    for field in other_fields:
+        field_color = driver.find_element(By.NAME, field).value_of_css_property("background-color")
+        assert field_color == "rgba(209, 231, 221, 1)", f"Поле {field} не подсвечено зелёным"
