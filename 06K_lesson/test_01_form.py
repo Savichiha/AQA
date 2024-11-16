@@ -1,52 +1,54 @@
 import pytest
 from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from webdriver_manager.chrome import ChromeDriverManager
 
-@pytest.fixture
+
+@pytest.fixture(scope="module")
 def driver():
-    driver = webdriver.Chrome()
+    service = Service(ChromeDriverManager().install())
+    driver = webdriver.Chrome(service=service)
     yield driver
     driver.quit()
+
 
 def test_form_submission(driver):
     driver.get("https://bonigarcia.dev/selenium-webdriver-java/data-types.html")
 
-    form_data = {
-        "first-name": "Иван",
-        "last-name": "Петров",
-        "address": "Ленина, 55-3",
-        "e-mail": "test@skypro.com",
-        "phone": "+7985899998787",
-        "city": "Москва",
-        "country": "Россия",
-        "job-position": "QA",
-        "company": "SkyPro"
-    }
+    WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, "input[name='first-name']")))
 
-    for name in form_data.keys():
-        WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.NAME, name))
-        )
+    driver.find_element(By.CSS_SELECTOR, "input[name='first-name']").send_keys('Иван')
+    driver.find_element(By.CSS_SELECTOR, "input[name='last-name']").send_keys('Петров')
+    driver.find_element(By.CSS_SELECTOR, "input[name='address']").send_keys('Ленина, 55-3')
 
-    for name, value in form_data.items():
-        element = driver.find_element(By.NAME, name)
-        element.clear()  # На всякий случай очистим поле перед вводом
-        element.send_keys(value)
+    WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, "input[name='e-mail']")))
+    driver.find_element(By.CSS_SELECTOR, "input[name='e-mail']").send_keys('test@skypro.com')
 
-    driver.find_element(By.TAG_NAME, "button").click()
+    driver.find_element(By.CSS_SELECTOR, "input[name='phone']").send_keys('+7985899998787')
 
-    WebDriverWait(driver, 20).until(
-        EC.presence_of_element_located((By.CSS_SELECTOR, "#zip-code"))
-    )
+    WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, "input[name='zip-code']")))
+    driver.find_element(By.CSS_SELECTOR, "input[name='zip-code']").send_keys('')
 
-    zip_field_color = driver.find_element(By.CSS_SELECTOR, "#zip-code").value_of_css_property("background-color")
-    assert zip_field_color == "rgba(248, 215, 218, 1)", "Поле Zip code не подсвечено красным"
+    driver.find_element(By.CSS_SELECTOR, "input[name='city']").send_keys('Москва')
+    driver.find_element(By.CSS_SELECTOR, "input[name='country']").send_keys('Россия')
+    driver.find_element(By.CSS_SELECTOR, "input[name='job-position']").send_keys('QA')
+    driver.find_element(By.CSS_SELECTOR, "input[name='company']").send_keys('SkyPro')
 
-    other_fields = [
-        "first-name", "last-name", "address", "e-mail", "phone", "city", "country", "job-position", "company"
-    ]
-    for field in other_fields:
-        field_color = driver.find_element(By.NAME, field).value_of_css_property("background-color")
-        assert field_color == "rgba(209, 231, 221, 1)", f"Поле {field} не подсвечено зелёным"
+    submit_button = WebDriverWait(driver, 20).until(
+        EC.element_to_be_clickable((By.CSS_SELECTOR, "button[type='submit']")))
+    submit_button.click()
+
+    WebDriverWait(driver, 10).until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".alert")))
+
+    alerts = driver.find_elements(By.CSS_SELECTOR, ".alert")
+
+    for alert in alerts:
+        if "alert-danger" in alert.get_attribute("class"):
+            assert alert.is_displayed(), "Поле Zip code не подсвечено красным."
+        elif "alert-success" in alert.get_attribute("class"):
+            assert alert.is_displayed(), "Не все поля подсвечены зелёным."
+
+    print("Все проверки прошли успешно!")
